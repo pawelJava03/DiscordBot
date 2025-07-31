@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import yt_dlp
 import dotenv
+import json
 
 import os
 import discord.opus
@@ -57,6 +58,25 @@ async def stop(ctx):
         await ctx.voice_client.stop()
         await ctx.send("Bot rozłączony")
 
+
+@bot.command()
+async def create(ctx, name: str, *links):
+    if not links:
+        ctx.send('Podaj przynajmniej jeden link')
+        return
+    try:
+        with open("playlists.json", "r") as f:
+            playlists = json.load(f)
+    except FileNotFoundError:
+        playlists = {}
+
+    playlists[name] = list(links)
+    with open("playlists.json", "w") as f:
+        json.dump(playlists, f, indent=2)
+
+    await ctx.send(f"Playlista {name} utworzona. Zapisano {len(links)} utworów.")
+
 dotenv.load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 bot.run(TOKEN)
+
